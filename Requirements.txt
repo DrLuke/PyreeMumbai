@@ -1,0 +1,13 @@
+PyOpenGL
+scipy
+numpy
+numpy-quaternion
+glfw
+#numba
+inotify_simple
+Pillow
+cffi
+mido
+python-rtmidi
+inotify-simple
+python-osc
