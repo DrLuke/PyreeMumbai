@@ -11,3 +11,4 @@ mido
 python-rtmidi
 inotify-simple
 python-osc
+imageio
