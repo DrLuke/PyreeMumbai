@@ -1,0 +1,18 @@
+{
+  "oscserveraddress": "0.0.0.0",
+  "oscserverport": 31337,
+  "oscclientaddress": "192.168.178.33",
+  "oscclientport": 31337,
+  "layerdefs" : [
+    {
+      "module": "layermods.sequencer",
+      "name": "Sequencer",
+      "sortkey": 5
+    },
+    {
+      "module": "layermods.triangles",
+      "name": "Base Triangles",
+      "sortkey": 10
+    }
+  ]
+}

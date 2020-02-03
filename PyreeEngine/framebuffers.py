@@ -71,3 +71,10 @@ class RegularFramebuffer(Framebuffer):
         glBindFramebuffer(GL_FRAMEBUFFER, 0)
         RegularFramebuffer.fsquad.textures = [self.texture]
         RegularFramebuffer.fsquad.render(RegularFramebuffer.fscamera.viewMatrix)
+
+    def clearFramebuffer(self):
+        glClear(GL_DEPTH_BUFFER_BIT)
+        glClear(GL_COLOR_BUFFER_BIT)
+
+    def clearDepth(self):
+        glClear(GL_DEPTH_BUFFER_BIT)

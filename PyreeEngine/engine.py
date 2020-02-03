@@ -95,6 +95,7 @@ import pythonosc.dispatcher
 import pythonosc.osc_server
 import pythonosc.udp_client
 import asyncio
+import os
 
 class Engine():
     def __init__(self):
@@ -104,10 +105,20 @@ class Engine():
         self.monitors: Dict[str, Monitor] = {}
         self.monitors = self.getmonitors()
 
-        resolution = (1280, 720)
+        with open("config.json", "r") as f:
+            config = json.load(f)
 
-        #self.window = glfw.create_window(1280, 720, "PyreeEngine", self.monitors[b"HDMI2"].monitorptr, None)
-        self.window = glfw.create_window(resolution[0], resolution[1], "PyreeEngine", None, None)
+        client_name = os.environ["PYREE_CLIENT"]
+        client_info = config[client_name]
+
+        print(client_info)
+        print(self.monitors)
+
+        resolution = (client_info["res"][0], client_info["res"][1])
+
+        self.window = glfw.create_window(1920, 1080
+                                         , "PyreeEngine", None, None)
+        #self.window = glfw.create_window(resolution[0], resolution[1], "PyreeEngine", self.monitors[client_info["monitor"].encode()].monitorptr, None)
         glfw.set_framebuffer_size_callback(self.window, self.framebufferResizeCallback)
 
         glfw.make_context_current(self.window)
@@ -192,7 +203,7 @@ class Engine():
         #self.asyncloop.stop()
         #self.asyncloop.run_forever()
 
-        glClearColor(0.2, 0.2, 0.3, 1.)
+        glClearColor(0.0, 0.0, 0.0, 1.)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
         glViewport(0, 0, self.layercontext.resolution[0], self.layercontext.resolution[1])

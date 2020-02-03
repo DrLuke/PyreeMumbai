@@ -13,6 +13,7 @@ from pathlib import Path
 
 import numpy as np
 
+from typing import Union
 
 class ModelObject(GeometryObject):
     def __init__(self, pathToObj: Path = None):
@@ -101,6 +102,9 @@ class ModelObject(GeometryObject):
             glDeleteBuffers(1, [self.vbo])
         if self.vao is not None:
             glDeleteVertexArrays(1, [self.vao])
+
+    def setuniform(self, name: str, value: Union[any, List[any]]):
+        self.uniforms[name] = value
 
 
 class FSQuad(ModelObject):
