@@ -4,7 +4,7 @@ layout (location = 1) in vec2 uvIn;
 layout (location = 2) in vec3 normIn;
 
 layout(binding=0) uniform sampler2D prev;
-layout(binding=1) uniform sampler2D printer_page;
+layout(binding=1) uniform sampler2D img;
 
 layout (location = 0) out vec4 colorOut;
 
@@ -73,6 +73,20 @@ vec3 rgb2hsv(vec3 c)
     return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
 }
 
+vec3 hsv2rgb(vec3 c)
+{
+    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
+
+vec3 hsvrot(vec3 rgb, float amount)
+{
+    vec3 hsv = rgb2hsv(rgb);
+    hsv.r += amount;
+    return hsv2rgb(hsv);
+}
+
 
 vec2 center_rotate(vec2 uv, float angle)
 {
@@ -108,29 +122,18 @@ void main() {
     float cornerdist = min(min(normIn.x, normIn.y), normIn.z) * 3./2.;
     float edgedist = 1.-(max(max(normIn.x, normIn.y), normIn.z) - 2./3.) * 3;
 
+    vec4 prev_samp = texture(prev, uv);
+
     // ------------------------------------
 
-    colorOut = 0.99*texture(prev, center_scale(center_rotate(uv - sin(time*1)*0.1, 3.14159 * time * 0.1), 0.5)).gbra +
+    vec4 samp = texture(prev, center_rotate(center_scale(uv, 0.99), 0.01));
+    samp.rgb = hsvrot(samp.rgb, prev_samp.g*0.1 + sin(time)*cornerdist*0.1);
+    colorOut = 0.99* samp +
     vec4(1-step(0.05, edgedist), 0, 0, 0)*0.95;
 
     colorOut = clamp(colorOut, 0, 1);
 
     colorOut = debug();
+    //colorOut = texture(img, uv);
+    //colorOut = vec4(0);
 }
-
-
-/*
-float tridist = max(max(normIn.x, normIn.y), normIn.z);
-
-    vec3 b = cos(normIn*50);
-    float lines1 = clamp(smoothstep(0.98, 1, max(max(b.x, b.y), b.z)), 0, 1);
-    vec3 a = cos(normIn*200);
-    float lines2 = clamp(smoothstep(0.95, 1, max(max(a.x, a.y), a.z)), 0, 1);
-
-    vec3 l1c = vec3(0.3) * lines1;
-    vec3 l2c = vec3(0.15) * lines2;
-
-    colorOut = vec4(
-        - l1c - l2c + vec3(0.8, 0.8, 0.8),
-        1);
-*/

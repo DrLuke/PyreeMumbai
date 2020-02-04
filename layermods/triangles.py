@@ -5,6 +5,7 @@ from pathlib import Path
 from PyreeEngine.layers import BaseEntry, LayerContext
 from PyreeEngine.shaders import HotloadingShader
 from PyreeEngine.simpleshader import SimpleShader
+from PyreeEngine.textures import TextureFromImage
 from pyutil.transition import *
 from PyreeEngine.basicObjects import ModelObject
 from PyreeEngine.camera import Camera
@@ -18,6 +19,8 @@ import json
 import os
 
 import numpy as np
+
+from pythonlpd8.lpd8mido import LPD8DeviceMido
 
 
 def tri_coords(x, y):
@@ -55,6 +58,8 @@ class LayerEntry(BaseEntry):
         client_name = os.environ["PYREE_CLIENT"]
         self.client_info = config[client_name]
 
+        self.image_tex = TextureFromImage(Path("res/tex/stars.png"))
+
         self.effect_fb = RegularFramebuffer(self.context.resolution)
         self.effect_shader = HotloadingShader(
             Path("res/glsl/default_vert.glsl"),
@@ -69,8 +74,10 @@ class LayerEntry(BaseEntry):
             0, 1, 0, 0.5, 1, c2[0], c2[1], c2[2]
         ])
         self.tri_effect_obj.textures = [
-            self.effect_fb.texture
+            self.effect_fb.texture,
+            self.image_tex.textures[0]
         ]
+        self.tri_effect_obj.setuniform("tex_res", self.image_tex.size)
 
         self.triobj = ModelObject()
         self.triobj.loadFromVerts(self.tri_verts())
@@ -89,7 +96,7 @@ class LayerEntry(BaseEntry):
         # XYZ UV NxNyNz
         verts = []
 
-        subdiv = 24 + 1
+        subdiv = 16 + 1
         step = 1 / subdiv
         # Bottom row
         for i in range(subdiv):
@@ -165,6 +172,6 @@ class LayerEntry(BaseEntry):
                 self.triobj.setuniform(f"c{i}pos", tri_config["verts"][i])
             self.triobj.setuniform("dist_amount", tri_config["bends"])
             self.triobj.setuniform("dist_amount_weight", tri_config["bends_weight"])
-            self.triobj.render(Camera().viewMatrix)
+            #self.triobj.render(Camera().viewMatrix)
 
-        #self.effect_fb.rendertoscreen()
+        self.effect_fb.rendertoscreen()

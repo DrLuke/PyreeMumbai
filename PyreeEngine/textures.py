@@ -103,7 +103,7 @@ class TextureFromImage(Texture):
         self.size = [1, 1]
 
     def texFromImage(self, path: Path, mode: str="RGBA"):
-        imdata = np.flipud(imread(path, False, mode))
+        imdata = np.flipud(imread(path, None, pilmode=mode))
 
         if self.textures is not None:
             glDeleteTextures(self.textures)    # Clean up old texture
@@ -115,7 +115,7 @@ class TextureFromImage(Texture):
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR)
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imdata.shape[0], imdata.shape[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, np.array(imdata.flatten(), 'B'))
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imdata.shape[1], imdata.shape[0], 0, GL_RGBA, GL_UNSIGNED_BYTE, np.array(imdata.flatten(), 'B'))
         glGenerateMipmap(GL_TEXTURE_2D)
 
         self.size = [imdata.shape[0], imdata.shape[1]]

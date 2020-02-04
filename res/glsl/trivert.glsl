@@ -25,13 +25,13 @@ vec2 distort(vec2 pos)
     vec2 sdir1 = c0pos - c2pos;
     vec2 sdir2 = c1pos - c0pos;
 
-    vec2 dist_center0 = c1pos + sdir0 * w.x;
-    vec2 dist_center1 = c2pos + sdir1 * w.y;
-    vec2 dist_center2 = c0pos + sdir2 * w.z;
+    //vec2 dist_center0 = c1pos + sdir0 * w.x;
+    //vec2 dist_center1 = c2pos + sdir1 * w.y;
+    //vec2 dist_center2 = c0pos + sdir2 * w.z;
 
-    ///vec2 dist_center0 = 0.5*(c1pos + c2pos);
-    //vec2 dist_center1 = 0.5*(c2pos + c0pos);
-    //vec2 dist_center2 = 0.5*(c0pos + c1pos);
+    vec2 dist_center0 = 0.5*(c1pos + c2pos);
+    vec2 dist_center1 = 0.5*(c2pos + c0pos);
+    vec2 dist_center2 = 0.5*(c0pos + c1pos);
     vec2 dir0 = c0pos - dist_center0;
     vec2 dir1 = c1pos - dist_center1;
     vec2 dir2 = c2pos - dist_center2;
@@ -43,9 +43,9 @@ vec2 distort(vec2 pos)
     );
 
     vec3 corner_dist = vec3(
-    dot(pos - c1pos, normalize(vec2(dir0.y, -dir0.x))),
-    dot(pos - c2pos, normalize(vec2(dir1.y, -dir1.x))),
-    dot(pos - c0pos, normalize(vec2(dir2.y, -dir2.x)))
+    dot(pos - c1pos, normalize(sdir0)),
+    dot(pos - c2pos, normalize(sdir1)),
+    dot(pos - c0pos, normalize(sdir2))
     ) / edge_lengths;
 
     //w.x = sin(time)*0.2 + 0.5;
@@ -56,7 +56,13 @@ vec2 distort(vec2 pos)
     vec3 dist = cos((1.-orth_distance)*3.14159*0.5);
     //dist = orth_distance;
 
-    vec3 weight = pow(normIn, vec3(2)) * dist * dist_amount;
+    vec3 weight = normIn * dist * dist_amount;
+
+    //weight = corner_dist*.1;
+    //weight.x = 0;
+    //weight.y = 0;
+    //weight.z = 0;//corner_dist.z*0.1 - 0.1;
+
 
     return dir0 * weight.x + dir1 * weight.y + dir2 * weight.z;
 }
