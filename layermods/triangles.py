@@ -12,6 +12,7 @@ from PyreeEngine.camera import Camera
 from PyreeEngine.framebuffers import RegularFramebuffer, DefaultFramebuffer
 
 import random
+import time
 
 import asyncio
 
@@ -54,6 +55,10 @@ class LayerEntry(BaseEntry):
         self.reloadcounter = 0
         with open("config.json", "r") as f:
             config = json.load(f)
+
+        self.lpd8 = None
+        self.pad = None
+        self.knob = None
 
         client_name = os.environ["PYREE_CLIENT"]
         self.client_info = config[client_name]
@@ -131,16 +136,64 @@ class LayerEntry(BaseEntry):
         return verts
 
     def init(self):
-        pass
+        if self.lpd8 is None:
+            time.sleep(2)
+            self.lpd8 = LPD8DeviceMido()
+
+        for i in range(8):
+            self.lpd8.addPadCB(0, i, self.knobCB)
+            self.lpd8.addKnobCB(0, i, self.knobCB)
+
+        if self.pad is None:
+            self.pad = [0] * 8
+
+        if self.knob is None:
+            self.knob = [0] * 8
+
+    def __serialize__(self):
+        a = {}
+        a["lpd8"] = self.lpd8
+        a["pad"] = self.pad
+        a["knob"] = self.knob
+        for i in range(8):
+            self.lpd8.removePadCB(0, i, self.padCB)
+            self.lpd8.removeKnobCB(0, i, self.knobCB)
+        return a
+
+    def __deserialize__(self, data):
+        if "lpd8" in data:
+            self.lpd8 = data["lpd8"]
+        if "pad" in data:
+            self.pad = data["pad"]
+        if "knob" in data:
+            self.knob = data["knob"]
 
     def __del__(self):
         pass
+
+    def padCB(self, programNum: int, padNum: int, knobNum: int, value: int, noteon: int, noteoff: int, cc: int,
+              pc: int):
+        if padNum is not None:
+            self.pad[padNum] = value
+
+
+    def knobCB(self, programNum: int, padNum: int, knobNum: int, value: int, noteon: int, noteoff: int, cc: int,
+               pc: int):
+        if knobNum is not None:
+            self.knob[knobNum] = value/127
 
     # Tick
     # ======
     def tick(self):
         self.effect_shader.tick()
         self.trishader.tick()
+
+        self.lpd8.tick()
+
+        self.tri_effect_obj.setuniform("knobs0", self.knob[:4])
+        self.tri_effect_obj.setuniform("knobs1", self.knob[4:])
+        self.tri_effect_obj.setuniform("pads", self.pad[:4])
+        self.tri_effect_obj.setuniform("toggles", self.pad[4:])
 
         self.reloadcounter += 1
         if self.reloadcounter > 100:
@@ -172,6 +225,6 @@ class LayerEntry(BaseEntry):
                 self.triobj.setuniform(f"c{i}pos", tri_config["verts"][i])
             self.triobj.setuniform("dist_amount", tri_config["bends"])
             self.triobj.setuniform("dist_amount_weight", tri_config["bends_weight"])
-            #self.triobj.render(Camera().viewMatrix)
+            self.triobj.render(Camera().viewMatrix)
 
-        self.effect_fb.rendertoscreen()
+        #self.effect_fb.rendertoscreen()

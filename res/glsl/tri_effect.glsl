@@ -11,6 +11,9 @@ layout (location = 0) out vec4 colorOut;
 uniform float time;
 uniform vec2 res;
 
+uniform vec4 knobs0;
+uniform vec4 knobs1;
+
 const vec2 uv_tri_center = (vec2(0, 0) + vec2(1, 0) + vec2(0.5, 1)) / 3.;
 
 // UTILITIES
@@ -133,7 +136,15 @@ void main() {
 
     colorOut = clamp(colorOut, 0, 1);
 
-    colorOut = debug();
-    //colorOut = texture(img, uv);
+    // ------------------------------------ HODL OUTPUT
+    float ripple_scale = 10.;
+    float ripple_speed = 10.;
+    vec2 ripple = uv + vec2(sin(abs(uv11.x)*ripple_scale - time), sin(abs(uv11.y)*ripple_scale - time))*0.01;
+    vec4 space_sample = texture(img, ripple);
+
+    //space_sample.xy = ripple;
+
+    colorOut = mix(space_sample, colorOut, knobs0.x);
+    //colorOut = debug();
     //colorOut = vec4(0);
 }

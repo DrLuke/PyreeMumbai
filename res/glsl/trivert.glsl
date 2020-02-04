@@ -71,10 +71,12 @@ void main()
 {
     vec3 pos = (MVP * vec4(posIn, 1)).xyz;
 
+
     vec3 cornerweight = 1 - normIn;
 
     // Corner positions
     pos.xy = c0pos * cornerweight.x + c1pos * cornerweight.y + c2pos * cornerweight.z;
+    pos.y *= 0.9 + 0.1;
 
     // Edge distortion
     pos.xy += distort(pos.xy);

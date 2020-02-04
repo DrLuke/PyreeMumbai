@@ -116,9 +116,9 @@ class Engine():
 
         resolution = (client_info["res"][0], client_info["res"][1])
 
-        self.window = glfw.create_window(1920, 1080
-                                         , "PyreeEngine", None, None)
-        #self.window = glfw.create_window(resolution[0], resolution[1], "PyreeEngine", self.monitors[client_info["monitor"].encode()].monitorptr, None)
+        #self.window = glfw.create_window(1920, 1080
+        #                                 , "PyreeEngine", None, None)
+        self.window = glfw.create_window(resolution[0], resolution[1], "PyreeEngine", self.monitors[client_info["monitor"].encode()].monitorptr, None)
         glfw.set_framebuffer_size_callback(self.window, self.framebufferResizeCallback)
 
         glfw.make_context_current(self.window)
